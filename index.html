@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أداة تجميع شيتات المشتريات والتعاقدات (أوفلاين)</title>
+<style>
+  :root {
+    --primary: #1e3a5f;
+    --primary-hover: #152a45;
+    --accent: #0f766e;
+    --accent-hover: #0d5e58;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --danger: #dc2626;
+    --success-bg: #f0fdf4;
+    --success-text: #166534;
+    --warn-bg: #fffbeb;
+    --warn-text: #92400e;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 24px 16px;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 24px 28px;
+    border-radius: 14px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  header h1 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  header p {
+    font-size: 0.92rem;
+    color: #cbd5e1;
+  }
+
+  .badge-offline {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 800px) {
+    .grid-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dropzone {
+    border: 2px dashed #94a3b8;
+    border-radius: 10px;
+    padding: 28px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #f8fafc;
+  }
+
+  .dropzone:hover, .dropzone.dragover {
+    border-color: var(--primary);
+    background: #eff6ff;
+  }
+
+  .dropzone svg {
+    width: 36px;
+    height: 36px;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+
+  .dropzone p {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .dropzone span {
+    font-size: 0.84rem;
+    color: var(--muted);
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  .file-list {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f1f5f9;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+
+  .file-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  .file-name {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-count {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .file-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-icon {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    font-size: 0.85rem;
+  }
+
+  .btn-icon:hover {
+    background: #e2e8f0;
+  }
+
+  .btn-icon.del:hover {
+    background: #fee2e2;
+    color: var(--danger);
+    border-color: #fecaca;
+  }
+
+  .options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.93rem;
+    cursor: pointer;
+  }
+
+  .checkbox-row input {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+
+  .actions-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 9px;
+    padding: 11px 20px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s ease;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: #f1f5f9;
+  }
+
+  .alert {
+    padding: 12px 16px;
+    border-radius: 9px;
+    font-size: 0.92rem;
+    margin-bottom: 18px;
+    display: none;
+  }
+
+  .alert.show {
+    display: block;
+  }
+
+  .alert-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+
+  .alert-success {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border: 1px solid #bbf7d0;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .stat-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+
+  .stat-label {
+    font-size: 0.83rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .stat-val {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+    min-width: 1050px;
+  }
+
+  th {
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    padding: 11px 10px;
+    text-align: center;
+    border: 1px solid #334155;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  td.merged-cell {
+    background-color: #f8fafc;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  tr:hover td:not(.merged-cell) {
+    background-color: #f1f5f9;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <h1>أداة تجميع شيتات المشتريات والتعاقدات</h1>
+      <p>دمج وترتيب بيانات الإدارات المختلفة في شيت Excel موحد بنفس ترتيب نموذج المخرجات مع دمج خلايا الوزارة والجهة تلقائياً</p>
+    </div>
+    <div class="badge-offline">
+      <span class="dot"></span>
+      يعمل 100% بدون إنترنت (مع تتبع Analytics)
+    </div>
+  </header>
+
+  <div id="alertBox" class="alert"></div>
+
+  <div class="grid-2">
+    <!-- Input Files Card -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        1. شيتات المدخلات الواردة من الإدارات (.xlsx)
+      </div>
+      <div class="dropzone" id="inputsDropzone">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p>اضغط لاختيار ملفات الإكسل أو اسحبها وأفلتها هنا</p>
+        <span>يمكنك تحديد عدة ملفات في نفس الوقت (مدخل 1، مدخل 2، ...)</span>
+        <input type="file" id="inputsFile" accept=".xlsx" multiple>
+      </div>
+      <div class="file-list" id="inputFileList"></div>
+    </div>
+
+    <!-- Template & Options Card -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        2. إعدادات التجميع وشيت المخرجات
+      </div>
+
+      <div style="margin-bottom: 12px; font-size: 0.9rem; color: var(--muted);">
+        يستخدم التطبيق افتراضياً أعمدة نموذج <strong>المخرج.xlsx</strong> المعتمد (12 عموداً). يمكنك أيضاً رفع شيت مخرجات مخصص لتحديث ترتيب الأعمدة:
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:14px;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('templateFile').click()">
+          تغيير قالب المخرجات (.xlsx)
+        </button>
+        <span id="templateStatus" style="font-size:0.85rem; color:var(--accent); font-weight:600;">القالب الافتراضي مفعل</span>
+        <input type="file" id="templateFile" accept=".xlsx">
+      </div>
+
+      <div class="options-group">
+        <label class="checkbox-row">
+          <input type="checkbox" id="optMergeMinistry" checked onchange="renderPreview()">
+          <span>دمج خلايا عمود <strong>«الوزارة»</strong> تلقائياً عند تكرار نفس الوزارة</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" id="optMergeEntity" checked onchange="renderPreview()">
+          <span>دمج خلايا عمود <strong>«الجهة»</strong> تلقائياً عند تكرار نفس الجهة</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" id="optUnifyMinistry" checked onchange="rebuildData()">
+          <span>توحيد صيغة اسم الوزارة (مثل: وزارة الموارد المائية والري) لدمجها معاً</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid" id="statsGrid" style="display:none;">
+    <div class="stat-box">
+      <div class="stat-label">عدد الملفات المدمجة</div>
+      <div class="stat-val" id="statFiles">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">إجمالي عدد العمليات</div>
+      <div class="stat-val" id="statRows">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">إجمالي القيمة الكلية للعقود (جنيه)</div>
+      <div class="stat-val" id="statTotalValue">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">إجمالي قيمة المنتجات المصرية (جنيه)</div>
+      <div class="stat-val" id="statEgyptValue">0</div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="actions-bar">
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <button type="button" class="btn btn-primary" id="btnExport" disabled onclick="exportMergedExcel()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        تحميل شيت المخرجات المجمع (.xlsx)
+      </button>
+      <button type="button" class="btn btn-secondary" id="btnClear" style="display:none;" onclick="clearAll()">
+        مسح الكل
+      </button>
+    </div>
+    <span style="font-size:0.84rem; color:var(--muted);">* يتم حذف أي بيانات زائدة أو تذييلات توقيعات تلقائياً</span>
+  </div>
+
+  <!-- Preview Table -->
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div style="padding:14px 20px; border-bottom:1px solid var(--border); font-weight:700; color:var(--primary); display:flex; justify-content:space-between; align-items:center;">
+      <span>معاينة البيانات المجمعة قبل التحميل</span>
+      <span id="previewBadge" style="font-size:0.82rem; color:var(--muted); font-weight:400;"></span>
+    </div>
+    <div id="previewContainer">
+      <div class="empty-state">لم يتم رفع أي ملفات مدخلات بعد. قم برفع ملفات الإكسل لعرض المعاينة وتجميعها.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK Initialization -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBLOOWoqDn6KtdBdJQ5nGz--1fhA6Q7PhY",
+    authDomain: "data-98e7c.firebaseapp.com",
+    projectId: "data-98e7c",
+    storageBucket: "data-98e7c.firebasestorage.app",
+    messagingSenderId: "947823068896",
+    appId: "1:947823068896:web:ec8c26a198a7788e9ef285",
+    measurementId: "G-9XX08SLYKE"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
+<script>
+// ============================================================================
+// PURE OFFLINE ZIP & XLSX READER / WRITER (Zero External Dependencies)
+// ============================================================================
+
+const CRC_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let k = 0; k < 8; k++) {
+      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    }
+    table[i] = c;
+  }
+  return table;
+})();
+
+function crc32(bytes) {
+  let crc = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) {
+    crc = (crc >>> 8) ^ CRC_TABLE[(crc ^ bytes[i]) & 0xFF];
+  }
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+
+async function inflateRaw(compressedBytes) {
+  const ds = new DecompressionStream('deflate-raw');
+  const writer = ds.writable.getWriter();
+  writer.write(compressedBytes);
+  writer.close();
+  const reader = ds.readable.getReader();
+  const chunks = [];
+  let totalLen = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    totalLen += value.length;
+  }
+  const out = new Uint8Array(totalLen);
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return out;
+}
+
+async function readZipEntries(arrayBuffer) {
+  const view = new DataView(arrayBuffer);
+  const bytes = new Uint8Array(arrayBuffer);
+  let eocdOffset = -1;
+  for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 65557); i--) {
+    if (view.getUint32(i, true) === 0x06054b50) {
+      eocdOffset = i;
+      break;
+    }
+  }
+  if (eocdOffset === -1) throw new Error("ملف الإكسل غير صالح (ZIP EOCD غير موجود)");
+
+  const totalEntries = view.getUint16(eocdOffset + 10, true);
+  let cdOffset = view.getUint32(eocdOffset + 16, true);
+  const decoder = new TextDecoder('utf-8');
+  const files = {};
+
+  for (let i = 0; i < totalEntries; i++) {
+    if (view.getUint32(cdOffset, true) !== 0x02014b50) break;
+    const method = view.getUint16(cdOffset + 10, true);
+    const compSize = view.getUint32(cdOffset + 20, true);
+    const fileNameLen = view.getUint16(cdOffset + 28, true);
+    const extraLen = view.getUint16(cdOffset + 30, true);
+    const commentLen = view.getUint16(cdOffset + 32, true);
+    const localHeaderOffset = view.getUint32(cdOffset + 42, true);
+
+    const fileName = decoder.decode(bytes.slice(cdOffset + 46, cdOffset + 46 + fileNameLen));
+    cdOffset += 46 + fileNameLen + extraLen + commentLen;
+
+    const localNameLen = view.getUint16(localHeaderOffset + 26, true);
+    const localExtraLen = view.getUint16(localHeaderOffset + 28, true);
+    const dataStart = localHeaderOffset + 30 + localNameLen + localExtraLen;
+    const compData = bytes.slice(dataStart, dataStart + compSize);
+
+    let rawData;
+    if (method === 0) {
+      rawData = compData;
+    } else if (method === 8) {
+      rawData = await inflateRaw(compData);
+    } else {
+      continue;
+    }
+    files[fileName] = rawData;
+  }
+  return files;
+}
+
+function colLetterToIndex(colStr) {
+  let idx = 0;
+  for (let i = 0; i < colStr.length; i++) {
+    idx = idx * 26 + (colStr.charCodeAt(i) - 64);
+  }
+  return idx - 1;
+}
+
+function indexToColLetter(idx) {
+  let s = '';
+  idx += 1;
+  while (idx > 0) {
+    let rem = (idx - 1) % 26;
+    s = String.fromCharCode(65 + rem) + s;
+    idx = Math.floor((idx - 1) / 26);
+  }
+  return s;
+}
+
+async function parseXlsxFile(arrayBuffer) {
+  const entries = await readZipEntries(arrayBuffer);
+  const decoder = new TextDecoder('utf-8');
+  const parser = new DOMParser();
+
+  const sharedStrings = [];
+  if (entries['xl/sharedStrings.xml']) {
+    const ssXml = decoder.decode(entries['xl/sharedStrings.xml']);
+    const ssDoc = parser.parseFromString(ssXml, 'application/xml');
+    const siNodes = ssDoc.getElementsByTagName('si');
+    for (let i = 0; i < siNodes.length; i++) {
+      const tNodes = siNodes[i].getElementsByTagName('t');
+      let str = '';
+      for (let j = 0; j < tNodes.length; j++) {
+        str += tNodes[j].textContent || '';
+      }
+      sharedStrings.push(str);
+    }
+  }
+
+  let sheetPath = 'xl/worksheets/sheet1.xml';
+  if (entries['xl/workbook.xml'] && entries['xl/_rels/workbook.xml.rels']) {
+    const wbDoc = parser.parseFromString(decoder.decode(entries['xl/workbook.xml']), 'application/xml');
+    const relsDoc = parser.parseFromString(decoder.decode(entries['xl/_rels/workbook.xml.rels']), 'application/xml');
+    const sheets = wbDoc.getElementsByTagName('sheet');
+    const rels = relsDoc.getElementsByTagName('Relationship');
+    const relMap = {};
+    for (let i = 0; i < rels.length; i++) {
+      relMap[rels[i].getAttribute('Id')] = rels[i].getAttribute('Target');
+    }
+    let chosenRid = null;
+    for (let i = 0; i < sheets.length; i++) {
+      const name = sheets[i].getAttribute('name') || '';
+      if (name.includes('الاعمال الجديدة') || name.includes('الأعمال الجديدة')) {
+        chosenRid = sheets[i].getAttribute('r:id');
+        break;
+      }
+    }
+    if (!chosenRid && sheets.length > 0) {
+      chosenRid = sheets[0].getAttribute('r:id');
+    }
+    if (chosenRid && relMap[chosenRid]) {
+      let target = relMap[chosenRid].replace(/^\/+/, '');
+      if (!target.startsWith('xl/')) target = 'xl/' + target;
+      if (entries[target]) sheetPath = target;
+    }
+  }
+
+  if (!entries[sheetPath]) {
+    const firstSheet = Object.keys(entries).find(k => k.startsWith('xl/worksheets/sheet') && k.endsWith('.xml'));
+    if (!firstSheet) throw new Error("لم يتم العثور على أوراق عمل داخل الملف");
+    sheetPath = firstSheet;
+  }
+
+  const sheetXml = decoder.decode(entries[sheetPath]);
+  const sheetDoc = parser.parseFromString(sheetXml, 'application/xml');
+  const rowNodes = sheetDoc.getElementsByTagName('row');
+
+  const grid = [];
+  for (let i = 0; i < rowNodes.length; i++) {
+    const rNode = rowNodes[i];
+    const rNum = parseInt(rNode.getAttribute('r') || (i + 1), 10) - 1;
+    while (grid.length <= rNum) grid.push([]);
+    const cNodes = rNode.getElementsByTagName('c');
+    for (let j = 0; j < cNodes.length; j++) {
+      const cNode = cNodes[j];
+      const ref = cNode.getAttribute('r') || '';
+      const colMatch = ref.match(/^([A-Z]+)/);
+      const colIdx = colMatch ? colLetterToIndex(colMatch[1]) : j;
+      const type = cNode.getAttribute('t') || '';
+
+      let val = null;
+      if (type === 'inlineStr') {
+        const tNodes = cNode.getElementsByTagName('t');
+        let s = '';
+        for (let k = 0; k < tNodes.length; k++) s += tNodes[k].textContent || '';
+        val = s;
+      } else {
+        const vNode = cNode.getElementsByTagName('v')[0];
+        if (vNode) {
+          const rawVal = vNode.textContent;
+          if (type === 's') {
+            val = sharedStrings[parseInt(rawVal, 10)] ?? '';
+          } else if (type === 'str' || type === 'e') {
+            val = rawVal;
+          } else if (type === 'b') {
+            val = rawVal === '1' ? 'TRUE' : 'FALSE';
+          } else {
+            const num = Number(rawVal);
+            val = isNaN(num) ? rawVal : num;
+          }
+        }
+      }
+      grid[rNum][colIdx] = val;
+    }
+  }
+  return grid;
+}
+
+function escapeXml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function buildZip(fileMap) {
+  const encoder = new TextEncoder();
+  const localParts = [];
+  const centralParts = [];
+  let offset = 0;
+
+  for (const [name, contentStr] of Object.entries(fileMap)) {
+    const nameBytes = encoder.encode(name);
+    const dataBytes = typeof contentStr === 'string' ? encoder.encode(contentStr) : contentStr;
+    const crc = crc32(dataBytes);
+    const size = dataBytes.length;
+
+    const lh = new Uint8Array(30 + nameBytes.length);
+    const lhv = new DataView(lh.buffer);
+    lhv.setUint32(0, 0x04034b50, true);
+    lhv.setUint16(4, 20, true);
+    lhv.setUint16(6, 0x0800, true);
+    lhv.setUint16(8, 0, true);
+    lhv.setUint16(10, 0, true);
+    lhv.setUint16(12, 0, true);
+    lhv.setUint32(14, crc, true);
+    lhv.setUint32(18, size, true);
+    lhv.setUint32(22, size, true);
+    lhv.setUint16(26, nameBytes.length, true);
+    lhv.setUint16(28, 0, true);
+    lh.set(nameBytes, 30);
+
+    localParts.push(lh, dataBytes);
+
+    const ch = new Uint8Array(46 + nameBytes.length);
+    const chv = new DataView(ch.buffer);
+    chv.setUint32(0, 0x02014b50, true);
+    chv.setUint16(4, 20, true);
+    chv.setUint16(6, 20, true);
+    chv.setUint16(8, 0x0800, true);
+    chv.setUint16(10, 0, true);
+    chv.setUint16(12, 0, true);
+    chv.setUint16(14, 0, true);
+    chv.setUint32(16, crc, true);
+    chv.setUint32(20, size, true);
+    chv.setUint32(24, size, true);
+    chv.setUint16(28, nameBytes.length, true);
+    chv.setUint16(30, 0, true);
+    chv.setUint16(32, 0, true);
+    chv.setUint16(34, 0, true);
+    chv.setUint16(36, 0, true);
+    chv.setUint32(38, 0, true);
+    chv.setUint32(42, offset, true);
+    ch.set(nameBytes, 46);
+
+    centralParts.push(ch);
+    offset += lh.length + dataBytes.length;
+  }
+
+  const cdStart = offset;
+  let cdSize = 0;
+  for (const cp of centralParts) cdSize += cp.length;
+
+  const eocd = new Uint8Array(22);
+  const ev = new DataView(eocd.buffer);
+  const count = Object.keys(fileMap).length;
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(4, 0, true);
+  ev.setUint16(6, 0, true);
+  ev.setUint16(8, count, true);
+  ev.setUint16(10, count, true);
+  ev.setUint32(12, cdSize, true);
+  ev.setUint32(16, cdStart, true);
+  ev.setUint16(20, 0, true);
+
+  return new Blob([...localParts, ...centralParts, eocd], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  });
+}
+
+function generateXlsxBlob(titleText, headers, rowsData, mergeRanges) {
+  const colWidths = [7, 26, 30, 14, 48, 18, 22, 26, 26, 22, 22, 22];
+  let colsXml = '<cols>';
+  for (let i = 0; i < headers.length; i++) {
+    const w = colWidths[i] || 20;
+    colsXml += `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`;
+  }
+  colsXml += '</cols>';
+
+  let sheetDataXml = '<sheetData>';
+
+  sheetDataXml += `<row r="1" ht="42" customHeight="1">`;
+  for (let c = 0; c < headers.length; c++) {
+    const ref = indexToColLetter(c) + '1';
+    if (c === 0) {
+      sheetDataXml += `<c r="${ref}" s="1" t="inlineStr"><is><t>${escapeXml(titleText)}</t></is></c>`;
+    } else {
+      sheetDataXml += `<c r="${ref}" s="1"/>`;
+    }
+  }
+  sheetDataXml += `</row>`;
+
+  sheetDataXml += `<row r="2" ht="12" customHeight="1"></row>`;
+
+  sheetDataXml += `<row r="3" ht="48" customHeight="1">`;
+  for (let c = 0; c < headers.length; c++) {
+    const ref = indexToColLetter(c) + '3';
+    sheetDataXml += `<c r="${ref}" s="2" t="inlineStr"><is><t>${escapeXml(headers[c])}</t></is></c>`;
+  }
+  sheetDataXml += `</row>`;
+
+  for (let r = 0; r < rowsData.length; r++) {
+    const excelRow = 4 + r;
+    const rowArr = rowsData[r];
+    sheetDataXml += `<row r="${excelRow}" ht="36" customHeight="1">`;
+    for (let c = 0; c < headers.length; c++) {
+      const ref = indexToColLetter(c) + excelRow;
+      const val = rowArr[c];
+      let styleIdx = 3;
+      if (c === 0 || c === 1 || c === 2) styleIdx = 4;
+      else if (typeof val === 'number') styleIdx = 5;
+
+      if (val === null || val === undefined || val === '') {
+        sheetDataXml += `<c r="${ref}" s="${styleIdx}"/>`;
+      } else if (typeof val === 'number' && !isNaN(val)) {
+        sheetDataXml += `<c r="${ref}" s="${styleIdx}"><v>${val}</v></c>`;
+      } else {
+        sheetDataXml += `<c r="${ref}" s="${styleIdx}" t="inlineStr"><is><t>${escapeXml(val)}</t></is></c>`;
+      }
+    }
+    sheetDataXml += `</row>`;
+  }
+  sheetDataXml += '</sheetData>';
+
+  const allMerges = [`A1:${indexToColLetter(headers.length - 1)}1`, ...mergeRanges];
+  let mergeXml = `<mergeCells count="${allMerges.length}">`;
+  for (const m of allMerges) {
+    mergeXml += `<mergeCell ref="${m}"/>`;
+  }
+  mergeXml += '</mergeCells>';
+
+  const worksheetXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheetViews>
+    <sheetView rightToLeft="1" tabSelected="1" workbookViewId="0"/>
+  </sheetViews>
+  <sheetFormatPr defaultRowHeight="24"/>
+  ${colsXml}
+  ${sheetDataXml}
+  ${mergeXml}
+</worksheet>`;
+
+  const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <numFmts count="1">
+    <numFmt numFmtId="164" formatCode="#,##0.00"/>
+  </numFmts>
+  <fonts count="4">
+    <font><sz val="11"/><name val="Arial"/></font>
+    <font><b/><sz val="15"/><color rgb="FFFFFFFF"/><name val="Arial"/></font>
+    <font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Arial"/></font>
+    <font><b/><sz val="11"/><color rgb="FF1E3A5F"/><name val="Arial"/></font>
+  </fonts>
+  <fills count="4">
+    <fill><patternFill patternType="none"/></fill>
+    <fill><patternFill patternType="gray125"/></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FF1E3A5F"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FF2B547E"/></patternFill></fill>
+  </fills>
+  <borders count="2">
+    <border><left/><right/><top/><bottom/><diagonal/></border>
+    <border>
+      <left style="thin"><color rgb="FFCBD5E1"/></left>
+      <right style="thin"><color rgb="FFCBD5E1"/></right>
+      <top style="thin"><color rgb="FFCBD5E1"/></right>
+      <bottom style="thin"><color rgb="FFCBD5E1"/></bottom>
+      <diagonal/>
+    </border>
+  </borders>
+  <cellStyleXfs count="1">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>
+  </cellStyleXfs>
+  <cellXfs count="6">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1">
+      <alignment horizontal="center" vertical="center" wrapText="1"/>
+    </xf>
+    <xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1">
+      <alignment horizontal="center" vertical="center" wrapText="1"/>
+    </xf>
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1">
+      <alignment horizontal="center" vertical="center" wrapText="1"/>
+    </xf>
+    <xf numFmtId="0" fontId="3" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1">
+      <alignment horizontal="center" vertical="center" wrapText="1"/>
+    </xf>
+    <xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1">
+      <alignment horizontal="center" vertical="center" wrapText="1"/>
+    </xf>
+  </cellXfs>
+</styleSheet>`;
+
+  const contentTypesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>`;
+
+  const relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`;
+
+  const workbookXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>
+    <sheet name="الاعمال الجديدة" sheetId="1" r:id="rId1"/>
+  </sheets>
+</workbook>`;
+
+  const workbookRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`;
+
+  return buildZip({
+    '[Content_Types].xml': contentTypesXml,
+    '_rels/.rels': relsXml,
+    'xl/workbook.xml': workbookXml,
+    'xl/_rels/workbook.xml.rels': workbookRelsXml,
+    'xl/styles.xml': stylesXml,
+    'xl/worksheets/sheet1.xml': worksheetXml
+  });
+}
+
+// ============================================================================
+// APPLICATION STATE & DATA PROCESSING LOGIC
+// ============================================================================
+
+const DEFAULT_TITLE = 'نموذج حصر المشتريات و التعاقدات عن العام المالى 2025/2026';
+const DEFAULT_HEADERS = [
+  'م',
+  'الوزارة',
+  'الجهة',
+  'رقم العملية',
+  'اسم العملية / موضوع التعاقد',
+  'طريقة التعاقد',
+  'القيمة الاجمالية للعقد (جنيه مصرى)',
+  'مصدر المنتجات محل الترسية',
+  'سبب الترسية على منتج مستورد ان وجد',
+  'قيمة المنتجات المصرية',
+  'قيمة المنتجات المستوردة',
+  'نسبة المكون الصناعي المصري وفقًا للشهادة (%)'
+];
+
+let templateTitle = DEFAULT_TITLE;
+let templateHeaders = [...DEFAULT_HEADERS];
+let uploadedInputs = [];
+let mergedRows = [];
+
+function showAlert(msg, type = 'error') {
+  const box = document.getElementById('alertBox');
+  box.textContent = msg;
+  box.className = `alert show alert-${type}`;
+}
+
+function hideAlert() {
+  document.getElementById('alertBox').className = 'alert';
+}
+
+function normalizeHeader(str) {
+  return String(str || '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه');
+}
+
+function normalizeMinistryName(name) {
+  if (!name) return '';
+  let s = String(name).trim().replace(/\s+/g, ' ');
+  if (!document.getElementById('optUnifyMinistry').checked) return s;
+  const norm = s.replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي');
+  if (norm === 'الموارد المائيه والري' || norm === 'وزارة الموارد المائيه والري') {
+    return 'وزارة الموارد المائية والري';
+  }
+  return s;
+}
+
+function extractRecordsFromGrid(grid) {
+  let hIdx = -1;
+  for (let i = 0; i < grid.length; i++) {
+    const row = grid[i] || [];
+    const rowText = row.map(c => String(c || '')).join(' ');
+    if (rowText.includes('اسم العملية') || (rowText.includes('الوزارة') && rowText.includes('الجهة'))) {
+      hIdx = i;
+      break;
+    }
+  }
+  if (hIdx === -1) {
+    throw new Error('لم يتم العثور على صف عناوين الجدول (الوزارة / الجهة / اسم العملية) داخل الملف.');
+  }
+
+  const rawHeaders = (grid[hIdx] || []).map(h => String(h || '').trim());
+  const records = [];
+  let currentMinistry = '';
+  let currentEntity = '';
+
+  for (let r = hIdx + 1; r < grid.length; r++) {
+    const row = grid[r] || [];
+    const mCell = row[0];
+    if (mCell === null || mCell === undefined || String(mCell).trim() === '') continue;
+
+    const mNum = Number(String(mCell).trim());
+    if (isNaN(mNum) || mNum <= 0) continue;
+
+    const rec = {};
+    for (let c = 0; c < rawHeaders.length; c++) {
+      if (rawHeaders[c]) {
+        rec[rawHeaders[c]] = row[c] !== undefined ? row[c] : null;
+      }
+    }
+
+    const wVal = rec['الوزارة'];
+    const jVal = rec['الجهة'];
+    if (wVal !== null && wVal !== undefined && String(wVal).trim() !== '') {
+      currentMinistry = String(wVal).trim();
+    }
+    if (jVal !== null && jVal !== undefined && String(jVal).trim() !== '') {
+      currentEntity = String(jVal).trim();
+    }
+
+    rec['الوزارة'] = currentMinistry;
+    rec['الجهة'] = currentEntity;
+    records.push(rec);
+  }
+
+  return records;
+}
+
+async function handleInputFiles(fileList) {
+  hideAlert();
+  if (!fileList || fileList.length === 0) return;
+
+  for (const file of fileList) {
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      showAlert(`الملف "${file.name}" ليس بصيغة .xlsx مدعومة.`);
+      continue;
+    }
+    try {
+      const buf = await file.arrayBuffer();
+      const grid = await parseXlsxFile(buf);
+      const records = extractRecordsFromGrid(grid);
+      if (records.length === 0) {
+        showAlert(`الملف "${file.name}" لا يحتوي على صفوف بيانات صالحة.`);
+        continue;
+      }
+      uploadedInputs.push({
+        id: Date.now() + Math.random(),
+        name: file.name,
+        records
+      });
+    } catch (err) {
+      showAlert(`خطأ أثناء قراءة "${file.name}": ${err.message}`);
+    }
+  }
+
+  renderFileList();
+  rebuildData();
+}
+
+async function handleTemplateFile(file) {
+  hideAlert();
+  if (!file) return;
+  try {
+    const buf = await file.arrayBuffer();
+    const grid = await parseXlsxFile(buf);
+    let hIdx = -1;
+    for (let i = 0; i < grid.length; i++) {
+      const rowText = (grid[i] || []).map(c => String(c || '')).join(' ');
+      if (rowText.includes('اسم العملية') || (rowText.includes('الوزارة') && rowText.includes('الجهة'))) {
+        hIdx = i;
+        break;
+      }
+    }
+    if (hIdx === -1) throw new Error('لم يتم العثور على صف العناوين في قالب المخرجات.');
+
+    const extractedHeaders = (grid[hIdx] || [])
+      .map(h => String(h || '').trim())
+      .filter(h => h !== '');
+
+    if (extractedHeaders.length < 3) throw new Error('عدد الأعمدة في قالب المخرجات غير كافٍ.');
+
+    if (grid[0] && grid[0][0]) {
+      templateTitle = String(grid[0][0]).trim();
+    }
+    templateHeaders = extractedHeaders;
+    document.getElementById('templateStatus').textContent = `تم اعتماد: ${file.name} (${templateHeaders.length} عمود)`;
+    rebuildData();
+  } catch (err) {
+    showAlert(`تعذر قراءة قالب المخرجات: ${err.message}`);
+  }
+}
+
+function moveFile(index, dir) {
+  const newIdx = index + dir;
+  if (newIdx < 0 || newIdx >= uploadedInputs.length) return;
+  const temp = uploadedInputs[index];
+  uploadedInputs[index] = uploadedInputs[newIdx];
+  uploadedInputs[newIdx] = temp;
+  renderFileList();
+  rebuildData();
+}
+
+function removeFile(index) {
+  uploadedInputs.splice(index, 1);
+  renderFileList();
+  rebuildData();
+}
+
+function clearAll() {
+  uploadedInputs = [];
+  mergedRows = [];
+  document.getElementById('inputsFile').value = '';
+  renderFileList();
+  rebuildData();
+  hideAlert();
+}
+
+function renderFileList() {
+  const container = document.getElementById('inputFileList');
+  if (uploadedInputs.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = uploadedInputs.map((item, idx) => `
+    <div class="file-item">
+      <div class="file-meta">
+        <span class="file-count">${item.records.length} عملية</span>
+        <span class="file-name" title="${item.name}">${item.name}</span>
+      </div>
+      <div class="file-actions">
+        <button type="button" class="btn-icon" title="تحريك لأعلى" onclick="moveFile(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.35"' : ''}>↑</button>
+        <button type="button" class="btn-icon" title="تحريك لأسفل" onclick="moveFile(${idx}, 1)" ${idx === uploadedInputs.length - 1 ? 'disabled style="opacity:0.35"' : ''}>↓</button>
+        <button type="button" class="btn-icon del" title="حذف الملف" onclick="removeFile(${idx})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function findMatchingValue(record, targetHeader) {
+  if (targetHeader in record) return record[targetHeader];
+  const normTarget = normalizeHeader(targetHeader);
+  for (const [k, v] of Object.entries(record)) {
+    const normK = normalizeHeader(k);
+    if (normK === normTarget || normK.includes(normTarget) || normTarget.includes(normK)) {
+      return v;
+    }
+  }
+  return null;
+}
+
+function rebuildData() {
+  mergedRows = [];
+  let serial = 1;
+  let totalContractVal = 0;
+  let totalEgyptVal = 0;
+
+  for (const fileObj of uploadedInputs) {
+    for (const rec of fileObj.records) {
+      const rowArr = templateHeaders.map((header, colIdx) => {
+        const normH = normalizeHeader(header);
+        if (colIdx === 0 && normH === 'م') {
+          return serial++;
+        }
+        if (normH === 'الوزاره') {
+          return normalizeMinistryName(rec['الوزارة']);
+        }
+        if (normH === 'الجهه') {
+          return String(rec['الجهة'] || '').trim();
+        }
+        let val = findMatchingValue(rec, header);
+        if (typeof val === 'string') val = val.trim();
+        return val;
+      });
+
+      const contractCell = findMatchingValue(rec, 'القيمة الاجمالية للعقد (جنيه مصرى)');
+      const egyptCell = findMatchingValue(rec, 'قيمة المنتجات المصرية');
+      if (typeof contractCell === 'number' && !isNaN(contractCell)) totalContractVal += contractCell;
+      if (typeof egyptCell === 'number' && !isNaN(egyptCell)) totalEgyptVal += egyptCell;
+
+      mergedRows.push(rowArr);
+    }
+  }
+
+  const hasData = mergedRows.length > 0;
+  document.getElementById('btnExport').disabled = !hasData;
+  document.getElementById('btnClear').style.display = uploadedInputs.length > 0 ? 'inline-flex' : 'none';
+  document.getElementById('statsGrid').style.display = hasData ? 'grid' : 'none';
+
+  document.getElementById('statFiles').textContent = uploadedInputs.length;
+  document.getElementById('statRows').textContent = mergedRows.length;
+  document.getElementById('statTotalValue').textContent = totalContractVal.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  document.getElementById('statEgyptValue').textContent = totalEgyptVal.toLocaleString('en-US', { maximumFractionDigits: 2 });
+
+  renderPreview();
+}
+
+function computeConsecutiveSpans(colIndex) {
+  const spans = new Array(mergedRows.length).fill(1);
+  if (colIndex < 0 || mergedRows.length === 0) return spans;
+
+  let start = 0;
+  let prevVal = String(mergedRows[0][colIndex] ?? '').trim();
+
+  for (let r = 1; r <= mergedRows.length; r++) {
+    const currVal = r < mergedRows.length ? String(mergedRows[r][colIndex] ?? '').trim() : null;
+    if (currVal !== prevVal) {
+      const len = r - start;
+      if (len > 1 && prevVal !== '') {
+        spans[start] = len;
+        for (let k = start + 1; k < r; k++) spans[k] = 0;
+      }
+      start = r;
+      prevVal = currVal;
+    }
+  }
+  return spans;
+}
+
+function renderPreview() {
+  const container = document.getElementById('previewContainer');
+  const badge = document.getElementById('previewBadge');
+
+  if (mergedRows.length === 0) {
+    badge.textContent = '';
+    container.innerHTML = '<div class="empty-state">لم يتم رفع أي ملفات مدخلات بعد. قم برفع ملفات الإكسل لعرض المعاينة وتجميعها.</div>';
+    return;
+  }
+
+  badge.textContent = `إجمالي ${mergedRows.length} صف مجمع`;
+
+  const wColIdx = templateHeaders.findIndex(h => normalizeHeader(h) === 'الوزاره');
+  const jColIdx = templateHeaders.findIndex(h => normalizeHeader(h) === 'الجهه');
+
+  const mergeW = document.getElementById('optMergeMinistry').checked;
+  const mergeJ = document.getElementById('optMergeEntity').checked;
+
+  const wSpans = mergeW ? computeConsecutiveSpans(wColIdx) : new Array(mergedRows.length).fill(1);
+  const jSpans = mergeJ ? computeConsecutiveSpans(jColIdx) : new Array(mergedRows.length).fill(1);
+
+  let html = '<div class="table-wrap"><table><thead><tr>';
+  for (const h of templateHeaders) {
+    html += `<th>${escapeXml(h)}</th>`;
+  }
+  html += '</tr></thead><tbody>';
+
+  for (let r = 0; r < mergedRows.length; r++) {
+    html += '<tr>';
+    for (let c = 0; c < templateHeaders.length; c++) {
+      if (c === wColIdx && mergeW) {
+        if (wSpans[r] === 0) continue;
+        const spanAttr = wSpans[r] > 1 ? ` rowspan="${wSpans[r]}" class="merged-cell"` : '';
+        html += `<td${spanAttr}>${escapeXml(mergedRows[r][c] ?? '')}</td>`;
+        continue;
+      }
+      if (c === jColIdx && mergeJ) {
+        if (jSpans[r] === 0) continue;
+        const spanAttr = jSpans[r] > 1 ? ` rowspan="${jSpans[r]}" class="merged-cell"` : '';
+        html += `<td${spanAttr}>${escapeXml(mergedRows[r][c] ?? '')}</td>`;
+        continue;
+      }
+
+      let val = mergedRows[r][c];
+      if (typeof val === 'number') {
+        val = val.toLocaleString('en-US', { maximumFractionDigits: 4 });
+      }
+      html += `<td>${escapeXml(val ?? '')}</td>`;
+    }
+    html += '</tr>';
+  }
+
+  html += '</tbody></table></div>';
+  container.innerHTML = html;
+}
+
+function exportMergedExcel() {
+  if (mergedRows.length === 0) return;
+
+  const wColIdx = templateHeaders.findIndex(h => normalizeHeader(h) === 'الوزاره');
+  const jColIdx = templateHeaders.findIndex(h => normalizeHeader(h) === 'الجهه');
+
+  const mergeW = document.getElementById('optMergeMinistry').checked;
+  const mergeJ = document.getElementById('optMergeEntity').checked;
+
+  const mergeRanges = [];
+  const startExcelRow = 4;
+
+  if (mergeW && wColIdx >= 0) {
+    const spans = computeConsecutiveSpans(wColIdx);
+    const colLet = indexToColLetter(wColIdx);
+    for (let r = 0; r < spans.length; r++) {
+      if (spans[r] > 1) {
+        const r1 = startExcelRow + r;
+        const r2 = startExcelRow + r + spans[r] - 1;
+        mergeRanges.push(`${colLet}${r1}:${colLet}${r2}`);
+      }
+    }
+  }
+
+  if (mergeJ && jColIdx >= 0) {
+    const spans = computeConsecutiveSpans(jColIdx);
+    const colLet = indexToColLetter(jColIdx);
+    for (let r = 0; r < spans.length; r++) {
+      if (spans[r] > 1) {
+        const r1 = startExcelRow + r;
+        const r2 = startExcelRow + r + spans[r] - 1;
+        mergeRanges.push(`${colLet}${r1}:${colLet}${r2}`);
+      }
+    }
+  }
+
+  const blob = generateXlsxBlob(templateTitle, templateHeaders, mergedRows, mergeRanges);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'المخرج_المجمع.xlsx';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showAlert('تم تصدير ملف الإكسل المجمع بنجاح مع دمج الخلايا المتكررة!', 'success');
+}
+
+const dropzone = document.getElementById('inputsDropzone');
+const inputsFile = document.getElementById('inputsFile');
+const templateFile = document.getElementById('templateFile');
+
+dropzone.addEventListener('click', () => inputsFile.click());
+
+dropzone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropzone.classList.add('dragover');
+});
+
+dropzone.addEventListener('dragleave', () => {
+  dropzone.classList.remove('dragover');
+});
+
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  if (e.dataTransfer && e.dataTransfer.files) {
+    handleInputFiles(e.dataTransfer.files);
+  }
+});
+
+inputsFile.addEventListener('change', (e) => {
+  handleInputFiles(e.target.files);
+  e.target.value = '';
+});
+
+templateFile.addEventListener('change', (e) => {
+  if (e.target.files && e.target.files[0]) {
+    handleTemplateFile(e.target.files[0]);
+  }
+  e.target.value = '';
+});
+</script>
+</body>
+</html>
